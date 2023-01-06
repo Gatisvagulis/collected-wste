@@ -7,6 +7,8 @@ class Employee:
     Parent class for Volunteer class, requires some default arguments.
     """
 
+    collected_waste_overview = []
+
     def __init__(self, last_name, name, year_of_birth, e_mail, phone, address, isAdministrator):
         self.last_name = last_name
         self.name = name
@@ -37,6 +39,7 @@ class Employee:
         print(b64_string)
         return b64_string
 
+    @staticmethod
     def create_image_from_string(self, image):
         """
         Create an image from base64 encoded file
@@ -47,15 +50,48 @@ class Employee:
         byte = file.read()
         file.close()
 
-        decodeit = open('photo.jpeg', 'wb')
+        decodeit = open('photo.jpg', 'wb')
         decodeit.write(base64.b64decode(byte))
         decodeit.close()
+
+    def admin_add_daly_collected_waste(self):
+        """
+        With this function only Administrator can add multiple daly collection waste.
+        :return: Print when information is successfully added, and append info to the daily_collected_waste_info list.
+        """
+        if self.isAdministrator:
+            print("Add collected trash: ")
+            while True:
+                waste_type = Volunteer.chose_waste_type()
+
+                volume = round(Volunteer.enter_volume(), 2)
+                weight = Volunteer.enter_weight()
+                density = Volunteer.calculate_density(weight, volume)
+                #Todo: Add validators
+                year = int(input("Enter year as number:"))
+                month = int(input("Enter month as number: "))
+                day = int(input("Enter day as number: "))
+
+                try:
+                    date = datetime.date(year, month, day)
+                except:
+                    date = datetime.datetime.now().date()
+
+                self.daily_collected_waste_info = {'date': date, 'type': waste_type, 'weight': weight, 'volume': volume, 'density': density}
+                self.collected_waste_overview.append(self.daily_collected_waste_info)
+                print("Info added!")
+                want_to_continue = input("To exit enter e value or enter to continue: ")
+                if want_to_continue == 'e':
+                    break
+        else:
+            print("Sorry, you are not an administrator!")
+
 
 
 class InputValuesWithValidators:
 
     """
-        Class contains methods to allow input employee data and validate the inputted value.
+        Class contains methods to allow input data and validate the inputted value.
     """
 
     @staticmethod
@@ -186,6 +222,37 @@ class InputValuesWithValidators:
             else:
                 print("Please enter y is administrator or n if not, to quit enter exit.")
 
+    @staticmethod
+    def validate_year_month_date(val_name):
+        """
+        Function validates user input. input must be int and bigger than 0
+        :return: return int
+        """
+        while True:
+            try:
+                val = int(input(f"Enter {val_name} as number: "))
+                if val < 0:
+                    print("Value can not be 0 or negative")
+                else:
+                    return val
+            except ValueError:
+                print("Please enter valid number.")
+
+    @staticmethod
+    def validate_entered_multiple_strings(*args):
+        """
+        Enter multiple string values between user will enter his choice
+        :param args: multiple string values
+        :return: user chosen string value
+        """
+
+        while True:
+            val = input(f"Please enter value from {args} ")
+            if val in args:
+                return val
+            else:
+                print("Invalid choice")
+
 
 class Volunteer(Employee):
     """
@@ -194,8 +261,6 @@ class Volunteer(Employee):
 
     def __init__(self, last_name, name, year_of_birth, e_mail, phone, address, isAdministrator):
         super().__init__(last_name, name, year_of_birth, e_mail, phone, address, isAdministrator)
-
-    collected_waste_overview = []
 
     def add_daly_collected_waste(self):
         """
@@ -244,14 +309,13 @@ class Volunteer(Employee):
         total = 0
         delta = datetime.timedelta(days=1)
 
-        for i, dat in enumerate(self.collected_waste_overview):
-            if dat['date'] == start_day and dat['type'] == trash_type and not len(self.collected_waste_overview) == i + 1:
-                total += dat[weight]
-            elif dat['date'] == start_day and dat['type'] == trash_type and len(self.collected_waste_overview) == i + 1:
-                total += dat[weight]
-                start_day += delta
+        while start_day <= last_day:
+            for i, dat in enumerate(self.collected_waste_overview):
+                if dat['date'] == start_day and dat['type'] == trash_type:
+                    total += dat[weight]
+            start_day += delta
 
-        print(f"total of {weight} in period {start_day} till {last_day} is {total}")
+        print(f"Trash type {trash_type} total of {weight} in period {start_day} till {last_day} is {total}")
 
     def calculate_sum_of_trash_total(self):
         """
