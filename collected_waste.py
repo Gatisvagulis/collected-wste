@@ -1,5 +1,7 @@
 import datetime
 import base64
+import os
+from pathlib import Path
 
 
 class Employee:
@@ -8,6 +10,7 @@ class Employee:
     """
 
     collected_waste_overview = []
+    image_64_encode = ''
 
     def __init__(self, last_name, name, year_of_birth, e_mail, phone, address, isAdministrator):
         self.last_name = last_name
@@ -28,31 +31,38 @@ class Employee:
         full_name = f"<{self.name} {self.last_name}>{self.e_mail}"
         return str(full_name)
 
-    def create_image_string(self, file_name):
+    def create_image_string(self, image_name):
         """
         Create string value from picture.
-        :param file_name: string as full image name
+        :param image_name: string as full image name
         :return: Return encoded picture to string
         """
-        with open(file_name, "rb") as img_file:
-            b64_string = base64.b64encode(img_file.read())
-        print(b64_string)
-        return b64_string
+        get_suffix = Path(os.getcwd(), image_name).suffix
+        if get_suffix != '.jpg':
+            print("Unsupported file format!")
+        else:
+            image = open(image_name, 'rb')
+            image_read = image.read()
+            self.image_64_encode = base64.b64encode(image_read)
+            image.close()
+            print(self.image_64_encode)
+            return self.image_64_encode
 
-    @staticmethod
-    def create_image_from_string(self, image):
+    def create_image_from_string(self):
         """
         Create an image from base64 encoded file
-        :param image: string as full image name
         :return: Nothing
         """
-        file = open(image, 'rb')
-        byte = file.read()
-        file.close()
+        if len(self.image_64_encode) > 0:
+            image_64_decode = base64.b64decode(self.image_64_encode)
+            image_result = open('foto.jpg', 'wb')
+            image_result.write(image_64_decode)
+            image_result.close()
+            print("Image created!")
+        else:
+            print("Sorry, first you need to encode image by using 6 option in menu!")
 
-        decodeit = open('photo.jpg', 'wb')
-        decodeit.write(base64.b64decode(byte))
-        decodeit.close()
+
 
     def admin_add_daly_collected_waste(self):
         """
@@ -67,10 +77,9 @@ class Employee:
                 volume = round(Volunteer.enter_volume(), 2)
                 weight = Volunteer.enter_weight()
                 density = Volunteer.calculate_density(weight, volume)
-                #Todo: Add validators
-                year = int(input("Enter year as number:"))
-                month = int(input("Enter month as number: "))
-                day = int(input("Enter day as number: "))
+                year = InputValuesWithValidators.validate_year_month_date("Enter year ")
+                month = InputValuesWithValidators.validate_year_month_date("Enter month ")
+                day = InputValuesWithValidators.validate_year_month_date("Enter day ")
 
                 try:
                     date = datetime.date(year, month, day)
@@ -85,7 +94,6 @@ class Employee:
                     break
         else:
             print("Sorry, you are not an administrator!")
-
 
 
 class InputValuesWithValidators:

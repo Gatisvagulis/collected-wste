@@ -90,8 +90,7 @@ def main():
         elif select == '6':
             volunteer.create_image_string(volunteer.image)
         elif select == '7':
-            volunteer.create_image_from_string(volunteer.image)
-            print("Image created!")
+            volunteer.create_image_from_string()
         elif select == '8':
             administrator.admin_add_daly_collected_waste()
 
